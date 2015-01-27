@@ -1,0 +1,228 @@
+# ---------------INSTALL REQUIRED PACKAGES/LIBRARIES-----------------#
+install.packages("ggplot2")
+install.packages("foreign")
+install.packages("gmodels")
+install.packages("vcd")
+install.packages("epiR")
+install.packages("NSM3")
+install.packages("latticeExtra")
+install.packages("caret")
+install.packages("vcdExtra")
+install.packages("MASS")
+install.packages("rms")
+install.packages("lsmeans")
+install.packages("contrast")
+install.packages("coefplot")
+install.packages("sjPlot")
+
+library(foreign)
+library(gmodels)
+library(vcd)
+library(epiR)
+library(NSM3)
+library(latticeExtra)
+library(caret)
+library(vcdExtra)
+library(MASS)
+library(rms)
+library(lsmeans)
+library(coefplot)
+library(sjPlot)
+
+
+# ----------------BASIC DATA MANIPULATION-----------------#
+
+# 1. Join Data
+# For demonstration purposes (not for execution in RStudio): Example of SQL outer join methodology shown below
+# (conducted externally prior to importing single, flattened dataset into R):
+
+    # create table records_sex as 
+    # select records.id, age, workclass_id, education_level_id, education_num, marital_status_id, 
+    # occupation_id, relationship_id, race_id, sex_id, capital_gain, capital_loss, hours_week, country_id, 
+    # over_50k, name as sex 
+    # from records left outer join sexes on
+    # records.sex_id = sexes.id;
+
+# The following methodology was then repeated, joining each categorical varaible table to the 
+# newly joined table created in the previous step. 
+
+
+# 2. Read in flattened dataset (after joining "records" with categorical variable tables) 
+data <- read.csv("C:/Users/Mandy/Desktop/RTI Assignment/flattened.csv", header=TRUE)
+
+
+# 3. Replace missing data: "?"'s, with "NA"
+data[data=='?']<-NA
+
+attach(data)
+
+# ----------------DATA EXPLORATION-----------------#
+
+summary(data)
+
+# Histograms and summaries of continuous variables: 
+
+# 1. Age
+hist(age, col='grey')
+summary(age)
+
+# 2. Capital Gain
+hist(capital_gain, col='grey')
+# plot without zeros 
+hist(capital_gain [!capital_gain==0], col='grey')
+summary(capital_gain)
+summary(capital_gain [!capital_gain==0])
+
+# 3. Capital Loss
+hist(capital_loss, col='grey')
+# plot without zeroes
+hist(capital_loss [!capital_loss==0], col='grey')
+summary(capital_loss)
+summary(capital_loss, [!capital_loss==0])
+
+# 4. Hours Worked
+hist(hours_week, col='grey')
+summary(hours_week)
+
+summary(data)
+
+#-------------ASSOCIATION ANALYSIS-----------------#
+
+# Crosstablulations and Association Tests Between Categorical Variables and Over_50k
+
+# 1. GENDER (binary ordinal)
+table(sex,over_50k) #make sure no cells with 0 
+CrossTable(sex,over_50k) 
+histogram(~over_50k|sex, main="Distribution of Over_50K by Gender",xlab="")
+histogram(~over_50k|sex, main="Distribution of Over_50k by Gender (Counts)", xlab="", type="count", color="#6960EC")
+mosaic(table(sex,over_50k))
+
+help(mosaic)
+
+# Formal test of association: Chi-Square Test for Gender
+Gen.Over50k <- table(sex,over_50k)
+assocstats(Gen.Over50k)
+# RESULTS: low p value (essentially 0) indicates relationship between gender and making over 50k
+
+
+# 2. EDUCATION LEVEL (ordinal)
+table(education_level, over_50k)
+#(using education level ID below since there is inherent order...use that to be able to use Chi Square test)
+edu.Over50k <- table(education_level_id,over_50k)
+assocstats(edu.Over50k)
+# Results: low p value (<0.05) indicates relationship between education level and making over50k
+
+
+# 3. WORK CLASS (nominal) 
+table(work_class,over_50k)
+# note that 0 people with a work_class value "never worked" make over 50k - have to deal with that...might not matter...
+CrossTable(work_class,over_50k)
+histogram(~over_50k|work_class, main="Distribution of Over_50k by Work Class",xlab="")
+histogram(~over_50k|work_class, main="Distribution of Over_50k by Work Class (Counts)", xlab="", type="count")
+mosaic(table(work_class,over_50k))
+
+workclass.Over50k <- table(work_class,over_50k)
+assocstats(workclass.Over50k)
+
+
+# 4. MARITAL STATUS (nominal) 
+table(marital_status, over_50k)
+
+mar.Over50k <- table(marital_status, over_50k)
+assocstats(mar.Over50k)
+
+# 5. OCCUPATION (nominal)
+table(occupation, over_50k)
+
+occ.Over50k <- table(occupation_id, over_50k)
+assocstats(occ.Over50k)
+
+# 6. RACE (nominal) 
+table(race, over_50k)
+race.Over50k <- table(race, over_50k)
+assocstats(race.Over50k)
+
+# 7. COUNTRY
+table(country, over_50k)
+# note the 0 for Holand_netherlands when over_50k=1 - have to account for...might not matter 
+country.Over50k <- table(country_id, over_50k)
+assocstats(country.Over50k)
+
+
+# Summary: seems that there exists an association b/t all 7 categorical variables and making over 50k
+
+#------------DETECTING CONFOUNDERS-----------------#
+# (Stratified Data Analysis) 
+
+# Race and Education Level - Is there a relationship b/t Education_Level and Over 50k after accounting for race? 
+table(race, over_50k, education_level)
+histogram(~over_50k|race + education_level, main="Distribution of Over_50k by Race and Education Level", xlab="Over_50k")
+CMHtest(table(race, over_50k, education_level))
+mantelhaen.test(table(race, over_50k, education_level))
+# RESULTS: low p value, reject null that there is NO relationship between education level and 50k after accounting for race
+
+# Education Level and Occupation - Is there a relationship b/t Occupation and Over 50k after accounting for Ed Level?
+CMHtest(table(education_level, over_50k, occupation))
+mantelhaen.test(table(education_level, over_50k, occupation))
+# RESULTS: issues with singularity of matrix...
+
+
+
+#------------DETECTING INTERACTIONS-----------------#
+
+# Potential Interaction between age and sex  
+table(age, over_50k, sex)
+Interact <- epi.2by2(table(age, over_50k, sex), homogeneity="breslow.day")
+summary(Interact)$OR.homog
+
+
+
+
+#------------LOGISTIC REGRESSION-----------------#
+
+# Create new variables for linearity assumption checking later on...
+data <- data.frame(data, E.LogE = education_num*log(education_num))
+data <- data.frame(data, CG.LogCG = capital_gain*log(capital_gain))
+data <- data.frame(data, CL.LogCL = capital_loss*log(capital_loss))
+data <- data.frame(data, A.LogA = age*log(age))
+attach(data)
+
+
+# Split data between training (60%), validation (20%), and testing (20%)
+trainindex <- createDataPartition(over_50k, p=0.6, list=FALSE, times=1)
+train <- data[trainindex,]
+test_validate <- data[-trainindex,] #(Data that test and validation sets will be split from)
+testindex <- createDataPartition(test_validate$over_50k, p=0.5, list=FALSE, times=1)
+test <-test_validate[testindex,]
+validate <-test_validate[-testindex,]
+
+
+over_50k <- factor(train$over_50k, levels=c(0,1), labels=c("No", "Yes"))
+
+
+# Check Assumption: Logit of continuous predictors are linear (Box Tidwell) 
+Assump.Check <- glm(train$over_50k ~ train$age + train$capital_gain + train$capital_loss +
+                     train$hours_week + train$sex + train$work_class + train$marital_status + 
+                     train$education_level + train$occupation + train$race + train$country + 
+                     train$education_num + train$E.LogE + train$CG.LogCG + train$CL.LogCL + 
+                     train$A.LogA, family=binomial(logit))
+summary(Assump.Check)
+
+
+
+# Reference Coding 
+contrasts(sex) <- contr.treatment(nlevels(sex), base = 1)
+contrasts(work_class) <- contr.treatment(nlevels(work_class), base=1)
+contrasts(marital_status) <- contr.treatment(nlevels(marital_status), base=1)
+contrasts(education_level) <- contr.treatment(nlevels(education_level), base=1)
+contrasts(occupation) <- contr.treatment(nlevels(occupation), base=1)
+contrasts(race) <- contr.treatment(nlevels(race), base=1)
+contrasts(country) <- contr.treatment(nlevels(country), base=1)
+# re run data partition so above affects variables are in all datasets
+
+# Model 
+Logit.Model <- glm(train$over_50k ~ train$age + train$capital_gain + train$capital_loss +
+                     train$hours_week + train$sex + train$work_class + train$marital_status + 
+                     train$education_num + train$education_level + train$occupation + 
+                     train$race + train$country, family=binomial(logit))
+summary(Logit.Model)
