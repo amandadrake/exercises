@@ -1,11 +1,13 @@
 Methodology: 
 In order to develop a model to predict whether individuals make over $50,000 per year, the 1996 Census data provided in the SQLite database was first condensed into one dataset in the command prompt. 
-A SQL left outer join was utilized to merge each categorical variable table with the records table. The joined dataset was then exported to excel and imported into R. 
+A SQL left outer join was utilized to merge each categorical variable table with the records table. 
+The joined dataset was then exported to excel and imported into R. 
 A general exploratory analysis was conducted to (1) understand the distributions of continuous variables and (2) understand associations between categorical variables. 
 Pearson Chi Square tests demonstrated associations between each categorical variable and the outcome variable, over_50k. 
-A notable association was identified between age and whether an individual makes over 50K, shown in the image included in this repository. 
- 
-A general stratified data analysis was also conducted to identify any potential confounding between predictor variables. The results of several Cochran-Mantel-Haenszel tests revealed, in particular, a relationship between education level and whether a person makes more than 50K after accounting for race. 
+A notable association was identified between age and whether an individual makes over 50K.
+
+A general stratified data analysis was also conducted to identify any potential confounding between predictor variables. 
+The results of several Cochran-Mantel-Haenszel tests revealed, in particular, a relationship between education level and whether a person makes more than 50K after accounting for race. 
 The data was also examined for potential interactions by conducting Breslow-Day tests. After solidifying an understanding of these relationships, the data was partitioned into 60% training and 20% each validation and test. 
 The linearity assumption was tested using the Box Tidwell transformation. The training dataset was then used to build a logistic regression model, with categorical variables coded using referencing coding. 
 The following variables were found to be significant (at an alpha level of 0.05) to predicting whether a person makes over 50K, listed below in table 1 along with the corresponding parameter estimate and p value. 
