@@ -1,3 +1,19 @@
+
+JOIN DATA
+ Example of SQL outer join methodology shown below:
+
+    create table records_sex as 
+    select records.id, age, workclass_id, education_level_id, education_num, marital_status_id, 
+    occupation_id, relationship_id, race_id, sex_id, capital_gain, capital_loss, hours_week, country_id, 
+    over_50k, name as sex 
+    from records left outer join sexes on
+    records.sex_id = sexes.id;
+
+The following methodology was then repeated, joining each categorical varaible table to the 
+newly joined table created in the previous step. 
+
+BEING R CODE:
+
 # ---------------INSTALL REQUIRED PACKAGES/LIBRARIES-----------------#
 install.packages("ggplot2")
 install.packages("foreign")
@@ -32,26 +48,13 @@ library(sjPlot)
 
 # ----------------BASIC DATA MANIPULATION-----------------#
 
-# 1. Join Data
-# For demonstration purposes (not for execution in RStudio): Example of SQL outer join methodology shown below
-# (conducted externally prior to importing single, flattened dataset into R):
-
-    # create table records_sex as 
-    # select records.id, age, workclass_id, education_level_id, education_num, marital_status_id, 
-    # occupation_id, relationship_id, race_id, sex_id, capital_gain, capital_loss, hours_week, country_id, 
-    # over_50k, name as sex 
-    # from records left outer join sexes on
-    # records.sex_id = sexes.id;
-
-# The following methodology was then repeated, joining each categorical varaible table to the 
-# newly joined table created in the previous step. 
 
 
-# 2. Read in flattened dataset (after joining "records" with categorical variable tables) 
+# 1. Read in flattened dataset (after joining "records" with categorical variable tables) 
 data <- read.csv("C:/Users/Mandy/Desktop/RTI Assignment/flattened.csv", header=TRUE)
 
 
-# 3. Replace missing data: "?"'s, with "NA"
+# 2. Replace missing data: "?"'s, with "NA"
 data[data=='?']<-NA
 
 attach(data)
