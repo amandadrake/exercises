@@ -12,6 +12,7 @@ JOIN DATA
 
 The following methodology was then repeated, joining each categorical varaible table to the 
 newly joined table created in the previous step. 
+The single joined table was then exported to CSV and imported into R.
 
 BEING R CODE:
 
