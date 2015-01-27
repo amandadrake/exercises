@@ -1,0 +1,51 @@
+Methodology: 
+In order to develop a model to predict whether individuals make over $50,000 per year, the 1996 Census data provided in the SQLite database was first condensed into one dataset in the command prompt. 
+A SQL left outer join was utilized to merge each categorical variable table with the records table. The joined dataset was then exported to excel and imported into R. 
+A general exploratory analysis was conducted to (1) understand the distributions of continuous variables and (2) understand associations between categorical variables. 
+Pearson Chi Square tests demonstrated associations between each categorical variable and the outcome variable, over_50k. 
+A notable association was identified between age and whether an individual makes over 50K, shown in the image included in this repository. 
+ 
+A general stratified data analysis was also conducted to identify any potential confounding between predictor variables. The results of several Cochran-Mantel-Haenszel tests revealed, in particular, a relationship between education level and whether a person makes more than 50K after accounting for race. 
+The data was also examined for potential interactions by conducting Breslow-Day tests. After solidifying an understanding of these relationships, the data was partitioned into 60% training and 20% each validation and test. 
+The linearity assumption was tested using the Box Tidwell transformation. The training dataset was then used to build a logistic regression model, with categorical variables coded using referencing coding. 
+The following variables were found to be significant (at an alpha level of 0.05) to predicting whether a person makes over 50K, listed below in table 1 along with the corresponding parameter estimate and p value. 
+The interpretation of the coefficients for continuous variables can be explained using age as an example: a person who is one year older than their counterpart is e^(2.57e-02) times more likely to make over 50K. 
+The interpretation of the coefficients for categorical variables can be explained using marital status: a person who is married to a civilian spouse is e^(2.19) times more likely to make over 50K than the reference, someone who is divorced. 
+
+
+Variable	Estimate	P value
+Intercept	-6.589	1.41e-10
+Age	2.57e-02	<2e-16
+Capital_Gain	3.18e-04	<2e-16
+Capital_Loss	6.93e-04	<2e-16
+Hours_Week	2.76e-02	<2e-16
+Work_Class: Local-Gov	-6.31e-01	3.06e-05
+Work_Class: Private 	-5.9e-01	9.65e-06
+Work_Class: Self-emp-not-inc	-9.77e-01	3.89e-11
+Work_Class: State-Gov	-9.54e-01	2.06e-08
+Marital_Status: Married-AF-Spouse	3.06	8.95e-07
+Marital_Status: Married-Civ-Spouse	2.19	<2e-16
+Marital_Status: Never-Married	-5.28e-01	3.21e-06
+Education_Num	2.34e01	4.11e-06
+Occupation: Exec-managerial	8.53e-01	<2e-16
+Occupation: Farming-fishing	-8.25e-01	1.12e-05
+Occupation: Handlers-cleaners	-6.73e-01	7.56e-04
+Occupation: Machine-op-inspct	-3.81e-01	6.93e-03
+Occupation: Other-Service	-8.39e-01	2.56e-07
+Occupation: Prof-Speciality	5.74e-01	1.61e-07
+Occupation: Protective-Service	5.35e-01	2.15e-03
+Occupation: Tech-Support 	7.88e-01	1.49e-07
+Race: Asian-Pacific-Islander	8.84e-01	2.48e-02
+Race: White	6.34e-01	4.58e-02
+Country: China	-2.62	4.95e-02
+Country: Columbia 	-3.04	1.09e-02
+Country: Guatemala	-3.30	4.44e-02
+Country: South	-2.47	8.06e-03
+Country: Vietnam 	-2.78	7.30e-03
+
+The above represents an initial attempt at modeling whether individuals make over 50K. The following next steps are recommended: 
+•	Further investigation into potential confounding and interactions between variables 
+•	Investigation of the incorporation of such interactions and how model quality is affected 
+•	Utilization of the validation dataset to compare the predictive power of multiple candidate models 
+•	Utilization of the test dataset to provide a final assessment of the chosen model’s predictive ability 
+	
