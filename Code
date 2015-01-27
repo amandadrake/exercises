@@ -1,6 +1,7 @@
 
 JOIN DATA
- Example of SQL outer join methodology shown below:
+ Example of SQL outer join methodology shown below
+ (the SQL querey was conducted in the comand prompt):
 
     create table records_sex as 
     select records.id, age, workclass_id, education_level_id, education_num, marital_status_id, 
