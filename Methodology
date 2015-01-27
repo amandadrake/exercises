@@ -49,5 +49,6 @@ The above represents an initial attempt at modeling whether individuals make ove
 •	Further investigation into potential confounding and interactions between variables 
 •	Investigation of the incorporation of such interactions and how model quality is affected 
 •	Utilization of the validation dataset to compare the predictive power of multiple candidate models 
-•	Utilization of the test dataset to provide a final assessment of the chosen model’s predictive ability 
+•	Utilization of the test dataset to provide a final assessment of the chosen model’s predictive ability; 
+	take into account model assessment measures including the area under the ROC curve and the missclassification rate 
 	
